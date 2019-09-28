@@ -5,9 +5,6 @@
 
 #include <ApplicationServices/ApplicationServices.h>
 
-#include <stdarg.h>
-
-using namespace cv;
 using namespace std;
 
 class Processing {
@@ -39,7 +36,7 @@ class Processing {
 
 		static AnalyzedMovement lastMovement;
 
-		static void processMovement(vector<Point>::iterator begin, vector<Point>::iterator end);
+		static void processMovement(vector<cv::Point>::iterator begin, vector<cv::Point>::iterator end);
 		static void processArea(vector<double>::iterator begin, vector<double>::iterator end);
 		static void processFinger(vector<int>::iterator begin, vector<int>::iterator end);
 

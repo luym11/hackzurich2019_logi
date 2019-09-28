@@ -14,6 +14,7 @@
 #define BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING 0.05
 
 FingerCount::FingerCount(void) {
+	using namespace cv;
 	hands = 1;
 	centerEvolution = vector<Point>();
 	areaEvolution = vector<double>();
@@ -35,11 +36,13 @@ void FingerCount::clear() {
 	areaEvolution.clear();
 }
 
-bool areaSort(vector<Point> A, vector<Point> B) {
+bool areaSort(vector<cv::Point> A, vector<cv::Point> B) {
+	using cv::contourArea;
 	return contourArea(A) > contourArea(B);
 }
 
-Mat FingerCount::findFingersCount(Mat input_image, Mat frame, bool rotateImage) {
+Mat FingerCount::findFingersCount(cv::Mat input_image, cv::Mat frame, bool rotateImage) {
+	using namespace cv;
 	if (rotateImage) {
 		rotate(input_image, input_image, ROTATE_180);
 		rotate(frame, frame, ROTATE_180);
@@ -199,12 +202,14 @@ Mat FingerCount::findFingersCount(Mat input_image, Mat frame, bool rotateImage) 
 	return contours_image;
 }
 
-double FingerCount::findPointsDistance(Point a, Point b) {
+double FingerCount::findPointsDistance(cv::Point a, cv::Point b) {
+	using namespace cv;
 	Point difference = a - b;
 	return sqrt(difference.ddot(difference));
 }
 
-vector<Point> FingerCount::compactOnNeighborhoodMedian(vector<Point> points, double max_neighbor_distance) {
+vector<cv::Point> FingerCount::compactOnNeighborhoodMedian(vector<cv::Point> points, double max_neighbor_distance) {
+	using namespace cv;
 	vector<Point> median_points;
 	
 	if (points.size() == 0)		
@@ -237,14 +242,16 @@ vector<Point> FingerCount::compactOnNeighborhoodMedian(vector<Point> points, dou
 	return median_points;
 }
 
-double FingerCount::findAngle(Point a, Point b, Point c) {
+double FingerCount::findAngle(cv::Point a, cv::Point b, cv::Point c) {
+	using namespace cv;
 	double ab = findPointsDistance(a, b);
 	double bc = findPointsDistance(b, c);
 	double ac = findPointsDistance(a, c);
 	return acos((ab * ab + bc * bc - ac * ac) / (2 * ab * bc)) * 180 / CV_PI;
 }
 
-bool FingerCount::isFinger(Point a, Point b, Point c, double limit_angle_inf, double limit_angle_sup, Point palm_center, double min_distance_from_palm) {
+bool FingerCount::isFinger(cv::Point a, cv::Point b, cv::Point c, double limit_angle_inf, double limit_angle_sup, cv::Point palm_center, double min_distance_from_palm) {
+	using namespace cv;
 	double angle = findAngle(a, b, c);
 	if (angle > limit_angle_sup || angle < limit_angle_inf)
 		return false;
@@ -274,7 +281,8 @@ bool FingerCount::isFinger(Point a, Point b, Point c, double limit_angle_inf, do
 	return true;
 }
 
-vector<Point> FingerCount::findClosestOnX(vector<Point> points, Point pivot) {
+vector<cv::Point> FingerCount::findClosestOnX(vector<cv::Point> points, cv::Point pivot) {
+	using namespace cv;
 	vector<Point> to_return(2);
 
 	if (points.size() == 0)
@@ -315,7 +323,7 @@ vector<Point> FingerCount::findClosestOnX(vector<Point> points, Point pivot) {
 	return to_return;
 }
 
-double FingerCount::findPointsDistanceOnX(Point a, Point b) {
+double FingerCount::findPointsDistanceOnX(cv::Point a, cv::Point b) {
 	double to_return = 0.0;
 
 	if (a.x > b.x)
@@ -326,7 +334,8 @@ double FingerCount::findPointsDistanceOnX(Point a, Point b) {
 	return to_return;
 }
 
-void FingerCount::drawVectorPoints(Mat image, vector<Point> points, Scalar color, bool with_numbers) {
+void FingerCount::drawVectorPoints(Mat image, vector<cv::Point> points, Scalar color, bool with_numbers) {
+	using namespace cv;
 	for (int i = 0; i < points.size(); i++) {
 		circle(image, points[i], 5, color, 2, 8);
 		if(with_numbers)

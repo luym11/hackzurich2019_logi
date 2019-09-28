@@ -78,16 +78,16 @@ void Processing::performAction() {
 	}
 }
 
-void Processing::processMovement(vector<Point>::iterator begin, vector<Point>::iterator end) {
-	Point displacement = *begin - *(end - 1);
+void Processing::processMovement(vector<cv::Point>::iterator begin, vector<cv::Point>::iterator end) {
+	cv::Point displacement = *begin - *(end - 1);
 	Processing::lastMovement.displacement = norm(displacement);
 	if (Processing::lastMovement.displacement > 90) {
 		double threshold = .5 * Processing::lastMovement.displacement;
-		if (displacement.ddot(Point(1,0)) > threshold) {
+		if (displacement.ddot(cv::Point(1,0)) > threshold) {
 			lastMovement.movType = SWIPE_RIGHT;
-		} else if (displacement.ddot(Point(0,1)) > threshold) {
+		} else if (displacement.ddot(cv::Point(0,1)) > threshold) {
 			lastMovement.movType = SWIPE_UP;
-		} else if (displacement.ddot(Point(-1,0)) > threshold) {
+		} else if (displacement.ddot(cv::Point(-1,0)) > threshold) {
 			lastMovement.movType = SWIPE_LEFT;
 		} else {
 			lastMovement.movType = SWIPE_DOWN;
