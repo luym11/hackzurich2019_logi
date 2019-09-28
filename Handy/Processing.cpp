@@ -37,5 +37,9 @@ void Processing::processArea(vector<double>::iterator begin, vector<double>::ite
 }
 
 void Processing::processFinger(vector<int>::iterator begin, vector<int>::iterator end) {
-	std::cout << "Average number of fingers detected: "<< std::accumulate(begin, end, 0) / 10 << std::endl;
+	if (std::accumulate(begin, end, 0) / 5 > 1) {
+		std::cout << "Fingers! " << std::endl; 
+	} else {
+		std::cout << "NO finger! " << std::endl; 
+	}
 }
