@@ -1,1 +1,1 @@
-g++ *.cpp `pkg-config --cflags --libs /usr/local/Cellar/opencv/2.4/build/unix-install/opencv.pc`
+g++ *.cpp `pkg-config --cflags --libs /usr/local/Cellar/opencv/2.4/build/unix-install/opencv.pc` -framework ApplicationServices

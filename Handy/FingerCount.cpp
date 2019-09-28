@@ -175,7 +175,7 @@ Mat FingerCount::findFingersCount(Mat input_image, Mat frame, bool rotateImage) 
 		Processing::MovementType movement = Processing::lastMovement.movType;
 		if (movement) {
 			if (rotateImage) movement = (Processing::MovementType)(~movement & 0b1111);
-			std::cout << "displacement: " << Processing::lastMovement.displacement;
+			// std::cout << "displacement: " << Processing::lastMovement.displacement;
 			switch (movement) {
 			default:
 			case Processing::SWIPE_UP:

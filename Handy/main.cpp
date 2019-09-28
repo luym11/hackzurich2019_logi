@@ -71,6 +71,8 @@ int main(int argc, char**) {
 			rotateImage = !rotateImage;
 		else if (key == 104) // h
 			fingerCount.toggleHands();
+
+		Processing::performAction();
 	}
 
 	return 0;

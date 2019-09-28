@@ -41,10 +41,10 @@ void Processing::processMovement(vector<Point>::iterator begin, vector<Point>::i
 void Processing::processArea(vector<double>::iterator begin, vector<double>::iterator end) {
 	if (Processing::lastMovement.displacement < 80) {
 		if (*(end - 1) < .8 * *begin) {
-			std::cout << "pinch!\n";
+			// std::cout << "pinch!\n";
 			lastMovement.pinType = PINCH;
 		} else if (*(end - 1) > 1.2 * *begin) {
-			std::cout << "expand!\n";
+			// std::cout << "expand!\n";
 			lastMovement.pinType = EXPAND;
 		}
 	}
@@ -52,5 +52,5 @@ void Processing::processArea(vector<double>::iterator begin, vector<double>::ite
 }
 
 void Processing::processFinger(vector<int>::iterator begin, vector<int>::iterator end) {
-	std::cout << "Average number of fingers detected: "<< std::accumulate(begin, end, 0) / 10 << std::endl;
+	// std::cout << "Average number of fingers detected: "<< std::accumulate(begin, end, 0) / 10 << std::endl;
 }
