@@ -1,14 +1,32 @@
 #include "Processing.h"
 #include <iostream>
 
-void Processing::processMovement(vector<Point>::iterator begin, vector<Point>::iterator end) {
+Processing::MovementType Processing::processMovement(vector<Point>::iterator begin, vector<Point>::iterator end, double& distance) {
 	Point displacement = *begin - *(end - 1);
-	double dispLen = norm(displacement);
-	//std::cout << "displacement: " << dispLen << "\n";
+	distance = norm(displacement);
+	if (distance > 90) {
+		double threshold = .5 * distance;
+		if (displacement.ddot(Point(1,0)) > threshold) {
+			return SWIPE_RIGHT;
+		} else if (displacement.ddot(Point(0,1)) > threshold) {
+			return SWIPE_UP;
+		} else if (displacement.ddot(Point(-1,0)) > threshold) {
+			return SWIPE_LEFT;
+		}
+		return SWIPE_DOWN;
+	}
+	return NO_SWIPE;
 }
 
-void Processing::processArea(vector<double>::iterator begin, vector<double>::iterator end) {
-	if (*(end - 1) < .8 * *begin) {
-		std::cout << "pinch!\n";
+Processing::PinchType Processing::processArea(vector<double>::iterator begin, vector<double>::iterator end, double displacement) {
+	if (displacement < 80) {
+		if (*(end - 1) < .8 * *begin) {
+			std::cout << "pinch!\n";
+			return PINCH;
+		} else if (*(end - 1) > 1.2 * *begin) {
+			std::cout << "expand!\n";
+			return EXPAND;
+		}
 	}
+	return NO_PINCH;
 }

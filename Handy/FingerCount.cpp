@@ -1,4 +1,5 @@
 #include "FingerCount.h"
+#include <iostream>
 
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
@@ -65,7 +66,9 @@ Mat FingerCount::findFingersCount(Mat input_image, Mat frame, bool rotateImage) 
 	std::sort(contours.begin(), contours.end(), areaSort);
 
 	for (int contourIndex = 0; contourIndex < contours.size() && contourIndex < hands; contourIndex++) {
-		areaEvolution.push_back(contourArea(contours[contourIndex]));
+		double area = contourArea(contours[contourIndex]);
+		if (area < 40000) continue;
+		areaEvolution.push_back(area);
 
 		// find the convex hull object for each contour and the defects, two different data structure are needed by the OpenCV api
 		vector<Point> hull_points;
@@ -162,8 +165,30 @@ Mat FingerCount::findFingersCount(Mat input_image, Mat frame, bool rotateImage) 
 
 		drawVectorPoints(frame, centerEvolution, color_blue, false);
 
-		if (centerEvolution.size() > 10) Processing::processMovement(centerEvolution.end() - 10, centerEvolution.end());
-		if (areaEvolution.size() > 10) Processing::processArea(areaEvolution.end() - 10, areaEvolution.end());
+		double disp = 0;
+		Processing::MovementType movement;
+		if (centerEvolution.size() > 10) movement = Processing::processMovement(centerEvolution.end() - 10, centerEvolution.end(), disp);
+		if (areaEvolution.size() > 10) Processing::processArea(areaEvolution.end() - 10, areaEvolution.end(), disp);
+
+		if (movement) {
+			if (rotateImage) movement = (Processing::MovementType)(~movement & 0b1111);
+			std::cout << "displacement: " << disp;
+			switch (movement) {
+			default:
+			case Processing::SWIPE_UP:
+				std::cout << " up\n";
+				break;
+			case Processing::SWIPE_DOWN:
+				std::cout << " down\n";
+				break;
+			case Processing::SWIPE_LEFT:
+				std::cout << " left\n";
+				break;
+			case Processing::SWIPE_RIGHT:
+				std::cout << " right\n";
+				break;
+			}
+		}
 	}
 
 	if (rotateImage) rotate(frame, frame, ROTATE_180);
