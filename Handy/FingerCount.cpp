@@ -15,6 +15,7 @@
 
 FingerCount::FingerCount(void) {
 	using namespace cv;
+	using cv::Point, cv::Ptr, cv::Rect, cv::Size;
 	hands = 1;
 	centerEvolution = vector<Point>();
 	areaEvolution = vector<double>();
@@ -43,6 +44,7 @@ bool areaSort(vector<cv::Point> A, vector<cv::Point> B) {
 
 Mat FingerCount::findFingersCount(cv::Mat input_image, cv::Mat frame, bool rotateImage) {
 	using namespace cv;
+	using cv::Point, cv::Ptr, cv::Rect, cv::Size;
 	if (rotateImage) {
 		rotate(input_image, input_image, ROTATE_180);
 		rotate(frame, frame, ROTATE_180);
@@ -204,12 +206,14 @@ Mat FingerCount::findFingersCount(cv::Mat input_image, cv::Mat frame, bool rotat
 
 double FingerCount::findPointsDistance(cv::Point a, cv::Point b) {
 	using namespace cv;
+	using cv::Point, cv::Ptr, cv::Rect, cv::Size;
 	Point difference = a - b;
 	return sqrt(difference.ddot(difference));
 }
 
 vector<cv::Point> FingerCount::compactOnNeighborhoodMedian(vector<cv::Point> points, double max_neighbor_distance) {
 	using namespace cv;
+	using cv::Point, cv::Ptr, cv::Rect, cv::Size;
 	vector<Point> median_points;
 	
 	if (points.size() == 0)		
@@ -244,6 +248,7 @@ vector<cv::Point> FingerCount::compactOnNeighborhoodMedian(vector<cv::Point> poi
 
 double FingerCount::findAngle(cv::Point a, cv::Point b, cv::Point c) {
 	using namespace cv;
+	using cv::Point, cv::Ptr, cv::Rect, cv::Size;
 	double ab = findPointsDistance(a, b);
 	double bc = findPointsDistance(b, c);
 	double ac = findPointsDistance(a, c);
@@ -252,6 +257,7 @@ double FingerCount::findAngle(cv::Point a, cv::Point b, cv::Point c) {
 
 bool FingerCount::isFinger(cv::Point a, cv::Point b, cv::Point c, double limit_angle_inf, double limit_angle_sup, cv::Point palm_center, double min_distance_from_palm) {
 	using namespace cv;
+	using cv::Point, cv::Ptr, cv::Rect, cv::Size;
 	double angle = findAngle(a, b, c);
 	if (angle > limit_angle_sup || angle < limit_angle_inf)
 		return false;
@@ -283,6 +289,7 @@ bool FingerCount::isFinger(cv::Point a, cv::Point b, cv::Point c, double limit_a
 
 vector<cv::Point> FingerCount::findClosestOnX(vector<cv::Point> points, cv::Point pivot) {
 	using namespace cv;
+	using cv::Point, cv::Ptr, cv::Rect, cv::Size;
 	vector<Point> to_return(2);
 
 	if (points.size() == 0)
@@ -336,6 +343,7 @@ double FingerCount::findPointsDistanceOnX(cv::Point a, cv::Point b) {
 
 void FingerCount::drawVectorPoints(Mat image, vector<cv::Point> points, Scalar color, bool with_numbers) {
 	using namespace cv;
+	using cv::Point, cv::Ptr, cv::Rect, cv::Size;
 	for (int i = 0; i < points.size(); i++) {
 		circle(image, points[i], 5, color, 2, 8);
 		if(with_numbers)

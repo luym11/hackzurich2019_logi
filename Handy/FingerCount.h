@@ -14,18 +14,18 @@ using namespace std;
 class FingerCount {
 	public:
 		FingerCount(void);
-		Mat findFingersCount(Mat input_image, Mat frame, bool rotateImage=false);
+		cv::Mat findFingersCount(cv::Mat input_image, cv::Mat frame, bool rotateImage=false);
 	
 		void clear();
 		void toggleHands();
 	private:
-		Scalar color_blue;
-		Scalar color_green;
-		Scalar color_red;
-		Scalar color_black;
-		Scalar color_white;
-		Scalar color_yellow;
-		Scalar color_purple;
+		cv::Scalar color_blue;
+		cv::Scalar color_green;
+		cv::Scalar color_red;
+		cv::Scalar color_black;
+		cv::Scalar color_white;
+		cv::Scalar color_yellow;
+		cv::Scalar color_purple;
 
 		vector<cv::Point> centerEvolution;
 		vector<double> areaEvolution;
@@ -38,5 +38,5 @@ class FingerCount {
 		bool isFinger(cv::Point a, cv::Point b, cv::Point c, double limit_angle_inf, double limit_angle_sup, cv::Point palm_center, double distance_from_palm_tollerance);
 		vector<cv::Point> findClosestOnX(vector<cv::Point> points, cv::Point pivot);
 		double findPointsDistanceOnX(cv::Point a, cv::Point b);
-		void drawVectorPoints(Mat image, vector<cv::Point> points, Scalar color, bool with_numbers);
+		void drawVectorPoints(cv::Mat image, vector<cv::Point> points, cv::Scalar color, bool with_numbers);
 };

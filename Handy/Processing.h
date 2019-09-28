@@ -13,7 +13,7 @@ class Processing {
 		const CGKeyCode OPTION = 0x3A;
 		const CGKeyCode CONTROL = 0x3B;
 
-		void pressKey(CGKeyCode keycode, bool shift=false, bool ctrl=false, bool option=false, bool cmd=false);
+		static void pressKey(CGKeyCode keycode, bool shift=false, bool ctrl=false, bool option=false, bool cmd=false);
 	public:
 		enum MovementType {
 			SWIPE_LEFT  = 0b1100,
