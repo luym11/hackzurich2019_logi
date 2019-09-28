@@ -20,6 +20,15 @@ class Processing {
 			EXPAND, PINCH, NO_PINCH
 		};
 
-		static MovementType processMovement(vector<Point>::iterator begin, vector<Point>::iterator end, double& distance);
-		static PinchType processArea(vector<double>::iterator begin, vector<double>::iterator end, double displacement);
+		struct AnalyzedMovement {
+			MovementType movType;
+			PinchType pinType;
+			int visibleFingers;
+			double displacement;
+		};
+
+		static AnalyzedMovement lastMovement;
+
+		static void processMovement(vector<Point>::iterator begin, vector<Point>::iterator end);
+		static void processArea(vector<double>::iterator begin, vector<double>::iterator end);
 };

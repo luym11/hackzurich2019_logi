@@ -1,32 +1,36 @@
 #include "Processing.h"
 #include <iostream>
 
-Processing::MovementType Processing::processMovement(vector<Point>::iterator begin, vector<Point>::iterator end, double& distance) {
+Processing::AnalyzedMovement Processing::lastMovement;
+
+void Processing::processMovement(vector<Point>::iterator begin, vector<Point>::iterator end) {
 	Point displacement = *begin - *(end - 1);
-	distance = norm(displacement);
-	if (distance > 90) {
-		double threshold = .5 * distance;
+	Processing::lastMovement.displacement = norm(displacement);
+	if (Processing::lastMovement.displacement > 90) {
+		double threshold = .5 * Processing::lastMovement.displacement;
 		if (displacement.ddot(Point(1,0)) > threshold) {
-			return SWIPE_RIGHT;
+			lastMovement.movType = SWIPE_RIGHT;
 		} else if (displacement.ddot(Point(0,1)) > threshold) {
-			return SWIPE_UP;
+			lastMovement.movType = SWIPE_UP;
 		} else if (displacement.ddot(Point(-1,0)) > threshold) {
-			return SWIPE_LEFT;
+			lastMovement.movType = SWIPE_LEFT;
+		} else {
+			lastMovement.movType = SWIPE_DOWN;
 		}
-		return SWIPE_DOWN;
+	} else {
+		lastMovement.movType = NO_SWIPE;
 	}
-	return NO_SWIPE;
 }
 
-Processing::PinchType Processing::processArea(vector<double>::iterator begin, vector<double>::iterator end, double displacement) {
-	if (displacement < 80) {
+void Processing::processArea(vector<double>::iterator begin, vector<double>::iterator end) {
+	if (Processing::lastMovement.displacement < 80) {
 		if (*(end - 1) < .8 * *begin) {
 			std::cout << "pinch!\n";
-			return PINCH;
+			lastMovement.pinType = PINCH;
 		} else if (*(end - 1) > 1.2 * *begin) {
 			std::cout << "expand!\n";
-			return EXPAND;
+			lastMovement.pinType = EXPAND;
 		}
 	}
-	return NO_PINCH;
+	lastMovement.pinType = NO_PINCH;
 }
