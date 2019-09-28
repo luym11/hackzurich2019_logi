@@ -4,73 +4,14 @@
 
 Processing::AnalyzedMovement Processing::lastMovement;
 
-void Processing::pressKey(CGKeyCode keycode, bool shift, bool ctrl, bool option, bool cmd) {
-    ProcessSerialNumber psn;
-    GetFrontProcess(&psn);
-    CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
-    CGEventRef press = CGEventCreateKeyboardEvent(source, keycode, true);
-    CGEventRef release = CGEventCreateKeyboardEvent(source, keycode, false);
-
-    CGEventRef pcmd, rcmd, pshift, rshift, poption, roption, pctrl, rctrl;
-
-    if (cmd) {
-    	pcmd = CGEventCreateKeyboardEvent(source, COMMAND, true);
-	rcmd = CGEventCreateKeyboardEvent(source, COMMAND, false);
-	CGEventPost(kCGHIDEventTap, pcmd);
-    }
-    if (shift) {
-    	pshift = CGEventCreateKeyboardEvent(source, SHIFT, true);
-	rshift = CGEventCreateKeyboardEvent(source, SHIFT, false);
-	CGEventPost(kCGHIDEventTap, pcmd);
-    }
-    if (option) {
-    	poption = CGEventCreateKeyboardEvent(source, OPTION, true);
-	roption = CGEventCreateKeyboardEvent(source, OPTION, false);
-	CGEventPost(kCGHIDEventTap, pcmd);
-    }
-    if (ctrl) {
-    	pctrl = CGEventCreateKeyboardEvent(source, CONTROL, true);
-	rctrl = CGEventCreateKeyboardEvent(source, CONTROL, false);
-	CGEventPost(kCGHIDEventTap, pcmd);
-    }
-
-    CGEventPost(kCGHIDEventTap, press);
-    CGEventPost(kCGHIDEventTap, release);
-
-    if (cmd) {
-    	CGEventPost(kCGHIDEventTap, rcmd);
-	CFRelease(pcmd);
-	CFRelease(rcmd);
-    }
-    if (shift) {
-    	CGEventPost(kCGHIDEventTap, rshift);
-	CFRelease(pshift);
-	CFRelease(rshift);
-    }
-    if (option) {
-    	CGEventPost(kCGHIDEventTap, roption);
-	CFRelease(poption);
-	CFRelease(roption);
-    }
-    if (ctrl) {
-    	CGEventPost(kCGHIDEventTap, rctrl);
-	CFRelease(pctrl);
-	CFRelease(rctrl);
-    }
-
-    CFRelease(press);
-    CFRelease(release);
-    CFRelease(source);
-}
-
 void Processing::performAction() {
 	if (Processing::lastMovement.movType) {
 		switch (Processing::lastMovement.movType) {
 		case SWIPE_LEFT:
-			pressKey(0x06, false, false, false, true);
+			Keyhandler::pressKey(0x06, false, false, false, true);
 			break;
 		case SWIPE_RIGHT:
-			pressKey(0x06, true, false, false, true);
+			Keyhandler::pressKey(0x06, true, false, false, true);
 			break;
 		default:
 			break;
