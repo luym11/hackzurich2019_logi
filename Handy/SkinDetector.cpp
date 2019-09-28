@@ -91,7 +91,7 @@ Mat SkinDetector::getSkinMask(Mat input) {
 		Scalar(hHighThreshold, sHighThreshold, vHighThreshold),
 		skinMask);
 
-	performOpening(skinMask, MORPH_ELLIPSE, { 3, 3 });
+	performOpening(skinMask, MORPH_ELLIPSE, Point(3, 3));
 	dilate(skinMask, skinMask, Mat(), Point(-1, -1), 3);
 
 	return skinMask;

@@ -16,7 +16,7 @@ using namespace std;
 int rotateImage = 0;
 
 int main(int argc, char**) {
-	VideoCapture videoCapture(1);
+	VideoCapture videoCapture(0);
 	videoCapture.set(CV_CAP_PROP_SETTINGS, 1);
 
 	if (!videoCapture.isOpened()) {
