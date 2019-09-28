@@ -4,7 +4,7 @@
 #include "opencv2/highgui.hpp"
 
 /*
- Author: Nicolò Castellazzi https://github.com/nicast
+ Author: Nicolï¿½ Castellazzi https://github.com/nicast
 */
 
 #define LIMIT_ANGLE_SUP 60
@@ -53,7 +53,7 @@ Mat FingerCount::findFingersCount(Mat input_image, Mat frame, bool rotateImage) 
 	if (input_image.channels() != 1)
 		return contours_image;
 
-	vector<vector<Point>> contours;
+	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
 
 	findContours(input_image, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
@@ -159,11 +159,13 @@ Mat FingerCount::findFingersCount(Mat input_image, Mat frame, bool rotateImage) 
 		circle(frame, center_bounding_rect, 5, color_purple, 2, 8);
 		drawVectorPoints(frame, filtered_finger_points, color_yellow, false);
 		putText(frame, to_string(filtered_finger_points.size()), center_bounding_rect, FONT_HERSHEY_PLAIN, 3, color_purple);
+		filtered_finger_points_sizes.push_back(filtered_finger_points.size());
 
 		drawVectorPoints(frame, centerEvolution, color_blue, false);
 
 		if (centerEvolution.size() > 10) Processing::processMovement(centerEvolution.end() - 10, centerEvolution.end());
-		if (areaEvolution.size() > 10) Processing::processArea(areaEvolution.end() - 10, areaEvolution.end());
+		if (areaEvolution.size() > 10) Processing::processArea(areaEvolution.end() - 10, areaEvolution.end()); 
+		if (filtered_finger_points_sizes.size() > 10) Processing::processFinger(filtered_finger_points_sizes.end() - 10, filtered_finger_points_sizes.end());
 	}
 
 	if (rotateImage) rotate(frame, frame, ROTATE_180);

@@ -6,7 +6,7 @@
 #include "Processing.h"
 
 /*
- Author: Nicolò Castellazzi https://github.com/nicast
+ Author: Nicolï¿½ Castellazzi https://github.com/nicast
 */
 
 using namespace cv;
@@ -30,6 +30,7 @@ class FingerCount {
 
 		vector<Point> centerEvolution;
 		vector<double> areaEvolution;
+		vector<int> filtered_finger_points_sizes;
 		int hands;
 
 		double findPointsDistance(Point a, Point b);
