@@ -22,18 +22,29 @@ class Processing {
 			EXPAND, PINCH, NO_PINCH
 		};
 
+		enum WaitAction {
+			UNDO, REDO, ESC, ZOOM_IN, ZOOM_OUT, NULL_ACTION
+		};
+
 		struct AnalyzedMovement {
 			MovementType movType;
 			PinchType pinType;
 			int visibleFingers;
 			double displacement;
+			bool isLocked;
 		};
 
 		static AnalyzedMovement lastMovement;
+		static int framesSinceAction, waitFrames;
+		static WaitAction requestedAction;
+
+		static void init();
 
 		static void processMovement(vector<Point>::iterator begin, vector<Point>::iterator end);
 		static void processArea(vector<double>::iterator begin, vector<double>::iterator end);
 		static void processFinger(vector<int>::iterator begin, vector<int>::iterator end);
+		static void reverseMovement();
+		static void clearAction(WaitAction action = NULL_ACTION);
 
-		static void performAction();
+		static void performAction(); 
 };

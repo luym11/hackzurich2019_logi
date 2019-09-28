@@ -172,26 +172,13 @@ Mat FingerCount::findFingersCount(Mat input_image, Mat frame, bool rotateImage) 
 
 		if (areaEvolution.size() > 10) Processing::processArea(areaEvolution.end() - 10, areaEvolution.end());
 
-		Processing::MovementType movement = Processing::lastMovement.movType;
-		if (movement) {
-			if (rotateImage) movement = (Processing::MovementType)(~movement & 0b1111);
-			// std::cout << "displacement: " << Processing::lastMovement.displacement;
-			switch (movement) {
-			default:
-			case Processing::SWIPE_UP:
-				std::cout << " up\n";
-				break;
-			case Processing::SWIPE_DOWN:
-				std::cout << " down\n";
-				break;
-			case Processing::SWIPE_LEFT:
-				std::cout << " left\n";
-				break;
-			case Processing::SWIPE_RIGHT:
-				std::cout << " right\n";
-				break;
-			}
-		}
+		if (rotateImage) Processing::reverseMovement();
+
+		processedHands++;
+	}
+
+	if (processedHands < 1) {
+		Processing::clearAction();
 	}
 
 	if (rotateImage) rotate(frame, frame, ROTATE_180);

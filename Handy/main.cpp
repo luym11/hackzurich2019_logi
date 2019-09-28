@@ -26,6 +26,8 @@ int main(int argc, char**) {
 	videoCapture.set(CAP_PROP_FRAME_WIDTH, 640);
 	videoCapture.set(CAP_PROP_FRAME_HEIGHT, 480);
 
+	Processing::init();
+
 	Mat frame, frameOut, handMask, foreground, fingerCountDebug;
 
 	BackgroundRemover backgroundRemover;
