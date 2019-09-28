@@ -3,10 +3,20 @@
 #include <algorithm>
 #include "opencv/cv.h"
 
+#include <ApplicationServices/ApplicationServices.h>
+
+#include <stdarg.h>
+
 using namespace cv;
 using namespace std;
 
 class Processing {
+		const CGKeyCode COMMAND = 0x37;
+		const CGKeyCode SHIFT = 0x38;
+		const CGKeyCode OPTION = 0x3A;
+		const CGKeyCode CONTROL = 0x3B;
+
+		void pressKey(CGKeyCode keycode, bool shift=false, bool ctrl=false, bool option=false, bool cmd=false);
 	public:
 		enum MovementType {
 			SWIPE_LEFT  = 0b1100,
@@ -32,4 +42,6 @@ class Processing {
 		static void processMovement(vector<Point>::iterator begin, vector<Point>::iterator end);
 		static void processArea(vector<double>::iterator begin, vector<double>::iterator end);
 		static void processFinger(vector<int>::iterator begin, vector<int>::iterator end);
+
+		static void performAction();
 };
