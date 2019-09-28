@@ -13,14 +13,18 @@
 using namespace cv;
 using namespace std;
 
-int main(int, char**) {
-	VideoCapture videoCapture(0);
+int rotateImage = 0;
+
+int main(int argc, char**) {
+	VideoCapture videoCapture(1);
 	videoCapture.set(CV_CAP_PROP_SETTINGS, 1);
 
 	if (!videoCapture.isOpened()) {
 		cout << "Can't find camera!" << endl;
 		return -1;
 	}
+	videoCapture.set(CAP_PROP_FRAME_WIDTH, 640);
+	videoCapture.set(CAP_PROP_FRAME_HEIGHT, 480);
 
 	Mat frame, frameOut, handMask, foreground, fingerCountDebug;
 
@@ -39,7 +43,14 @@ int main(int, char**) {
 		
 		faceDetector.removeFaces(frame, foreground);
 		handMask = skinDetector.getSkinMask(foreground);
-		fingerCountDebug = fingerCount.findFingersCount(handMask, frameOut);
+		fingerCountDebug = fingerCount.findFingersCount(handMask, frameOut, rotateImage);
+
+		if (rotateImage) {
+			rotate(frameOut, frameOut, ROTATE_180);
+			rotate(foreground, foreground, ROTATE_180);
+			rotate(handMask, handMask, ROTATE_180);
+			rotate(fingerCountDebug, fingerCountDebug, ROTATE_180);
+		}
 
 		imshow("output", frameOut);
 		imshow("foreground", foreground);
@@ -54,6 +65,12 @@ int main(int, char**) {
 			backgroundRemover.calibrate(frame);
 		else if (key == 115) // s
 			skinDetector.calibrate(frame);
+		else if (key == 99) // c
+			fingerCount.clear();
+		else if (key == 114) // r
+			rotateImage = !rotateImage;
+		else if (key == 104) // h
+			fingerCount.toggleHands();
 	}
 
 	return 0;

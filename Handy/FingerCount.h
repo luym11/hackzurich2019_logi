@@ -1,6 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include "opencv/cv.h"
+
+#include "Processing.h"
 
 /*
  Author: Nicolò Castellazzi https://github.com/nicast
@@ -12,8 +15,10 @@ using namespace std;
 class FingerCount {
 	public:
 		FingerCount(void);
-		Mat findFingersCount(Mat input_image, Mat frame);
+		Mat findFingersCount(Mat input_image, Mat frame, bool rotateImage=false);
 	
+		void clear();
+		void toggleHands();
 	private:
 		Scalar color_blue;
 		Scalar color_green;
@@ -22,6 +27,11 @@ class FingerCount {
 		Scalar color_white;
 		Scalar color_yellow;
 		Scalar color_purple;
+
+		vector<Point> centerEvolution;
+		vector<double> areaEvolution;
+		int hands;
+
 		double findPointsDistance(Point a, Point b);
 		vector<Point> compactOnNeighborhoodMedian(vector<Point> points, double max_neighbor_distance);
 		double findAngle(Point a, Point b, Point c);

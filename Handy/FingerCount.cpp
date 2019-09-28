@@ -13,6 +13,9 @@
 #define BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING 0.05
 
 FingerCount::FingerCount(void) {
+	hands = 1;
+	centerEvolution = vector<Point>();
+	areaEvolution = vector<double>();
 	color_blue = Scalar(255, 0, 0);
 	color_green = Scalar(0, 255, 0);
 	color_red = Scalar(0, 0, 255);
@@ -22,7 +25,24 @@ FingerCount::FingerCount(void) {
 	color_purple = Scalar(255, 0, 255);
 }
 
-Mat FingerCount::findFingersCount(Mat input_image, Mat frame) {
+void FingerCount::toggleHands() {
+	hands = hands == 1 ? 2 : 1;
+}
+
+void FingerCount::clear() {
+	centerEvolution.clear();
+	areaEvolution.clear();
+}
+
+bool areaSort(vector<Point> A, vector<Point> B) {
+	return contourArea(A) > contourArea(B);
+}
+
+Mat FingerCount::findFingersCount(Mat input_image, Mat frame, bool rotateImage) {
+	if (rotateImage) {
+		rotate(input_image, input_image, ROTATE_180);
+		rotate(frame, frame, ROTATE_180);
+	}
 	Mat contours_image = Mat::zeros(input_image.size(), CV_8UC3);
 
 	// check if the source image is good
@@ -42,112 +62,111 @@ Mat FingerCount::findFingersCount(Mat input_image, Mat frame) {
 	if (contours.size() <= 0)
 		return contours_image;
 
-	// find the biggest contour (let's suppose it's our hand)
-	int biggest_contour_index = -1;
-	double biggest_area = 0.0;
+	std::sort(contours.begin(), contours.end(), areaSort);
 
-	for (int i = 0; i < contours.size(); i++) {
-		double area = contourArea(contours[i], false);
-		if (area > biggest_area) {
-			biggest_area = area;
-			biggest_contour_index = i;
+	for (int contourIndex = 0; contourIndex < contours.size() && contourIndex < hands; contourIndex++) {
+		areaEvolution.push_back(contourArea(contours[contourIndex]));
+
+		// find the convex hull object for each contour and the defects, two different data structure are needed by the OpenCV api
+		vector<Point> hull_points;
+		vector<int> hull_ints;
+
+		// for drawing the convex hull and for finding the bounding rectangle
+		convexHull(Mat(contours[contourIndex]), hull_points, true);
+
+		// for finding the defects
+		convexHull(Mat(contours[contourIndex]), hull_ints, false);
+
+		// we need at least 3 points to find the defects
+		vector<Vec4i> defects;
+		if (hull_ints.size() > 3)
+			convexityDefects(Mat(contours[contourIndex]), hull_ints, defects);
+		else
+			return contours_image;
+
+		// we bound the convex hull
+		Rect bounding_rectangle = boundingRect(Mat(hull_points));
+
+		// we find the center of the bounding rectangle, this should approximately also be the center of the hand
+		Point center_bounding_rect(
+			(bounding_rectangle.tl().x + bounding_rectangle.br().x) / 2,
+			(bounding_rectangle.tl().y + bounding_rectangle.br().y) / 2
+		);
+		centerEvolution.push_back(center_bounding_rect);
+
+		// we separate the defects keeping only the ones of intrest
+		vector<Point> start_points;
+		vector<Point> far_points;
+
+		for (int i = 0; i < defects.size(); i++) {
+			start_points.push_back(contours[contourIndex][defects[i].val[0]]);
+
+			// filtering the far point based on the distance from the center of the bounding rectangle
+			if (findPointsDistance(contours[contourIndex][defects[i].val[2]], center_bounding_rect) < bounding_rectangle.height * BOUNDING_RECT_FINGER_SIZE_SCALING)
+				far_points.push_back(contours[contourIndex][defects[i].val[2]]);
 		}
-	}
 
-	if (biggest_contour_index < 0)
-		return contours_image;
+		// we compact them on their medians
+		vector<Point> filtered_start_points = compactOnNeighborhoodMedian(start_points, bounding_rectangle.height * BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING);
+		vector<Point> filtered_far_points = compactOnNeighborhoodMedian(far_points, bounding_rectangle.height * BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING);
 
-	// find the convex hull object for each contour and the defects, two different data structure are needed by the OpenCV api
-	vector<Point> hull_points;
-	vector<int> hull_ints;
+		// now we try to find the fingers
+		vector<Point> filtered_finger_points;
 
-	// for drawing the convex hull and for finding the bounding rectangle
-	convexHull(Mat(contours[biggest_contour_index]), hull_points, true);
-
-	// for finding the defects
-	convexHull(Mat(contours[biggest_contour_index]), hull_ints, false);
-
-	// we need at least 3 points to find the defects
-	vector<Vec4i> defects;
-	if (hull_ints.size() > 3)
-		convexityDefects(Mat(contours[biggest_contour_index]), hull_ints, defects);
-	else
-		return contours_image;
-
-	// we bound the convex hull
-	Rect bounding_rectangle = boundingRect(Mat(hull_points));
-
-	// we find the center of the bounding rectangle, this should approximately also be the center of the hand
-	Point center_bounding_rect(
-		(bounding_rectangle.tl().x + bounding_rectangle.br().x) / 2,
-		(bounding_rectangle.tl().y + bounding_rectangle.br().y) / 2
-	);
-
-	// we separate the defects keeping only the ones of intrest
-	vector<Point> start_points;
-	vector<Point> far_points;
-
-	for (int i = 0; i < defects.size(); i++) {
-		start_points.push_back(contours[biggest_contour_index][defects[i].val[0]]);
-
-		// filtering the far point based on the distance from the center of the bounding rectangle
-		if (findPointsDistance(contours[biggest_contour_index][defects[i].val[2]], center_bounding_rect) < bounding_rectangle.height * BOUNDING_RECT_FINGER_SIZE_SCALING)
-			far_points.push_back(contours[biggest_contour_index][defects[i].val[2]]);
-	}
-
-	// we compact them on their medians
-	vector<Point> filtered_start_points = compactOnNeighborhoodMedian(start_points, bounding_rectangle.height * BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING);
-	vector<Point> filtered_far_points = compactOnNeighborhoodMedian(far_points, bounding_rectangle.height * BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING);
-
-	// now we try to find the fingers
-	vector<Point> filtered_finger_points;
-
-	if (filtered_far_points.size() > 1) {
-		vector<Point> finger_points;
-		
-		for (int i = 0; i < filtered_start_points.size(); i++) {
-			vector<Point> closest_points = findClosestOnX(filtered_far_points, filtered_start_points[i]);
+		if (filtered_far_points.size() > 1) {
+			vector<Point> finger_points;
 			
-			if (isFinger(closest_points[0], filtered_start_points[i], closest_points[1], LIMIT_ANGLE_INF, LIMIT_ANGLE_SUP, center_bounding_rect, bounding_rectangle.height * BOUNDING_RECT_FINGER_SIZE_SCALING))
-				finger_points.push_back(filtered_start_points[i]);
-		}
-
-		if (finger_points.size() > 0) {
-
-			// we have at most five fingers usually :)
-			while (finger_points.size() > 5)
-				finger_points.pop_back();
-
-			// filter out the points too close to each other
-			for (int i = 0; i < finger_points.size() - 1; i++) {
-				if (findPointsDistanceOnX(finger_points[i], finger_points[i + 1]) > bounding_rectangle.height * BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING * 1.5)
-					filtered_finger_points.push_back(finger_points[i]);
+			for (int i = 0; i < filtered_start_points.size(); i++) {
+				vector<Point> closest_points = findClosestOnX(filtered_far_points, filtered_start_points[i]);
+				
+				if (isFinger(closest_points[0], filtered_start_points[i], closest_points[1], LIMIT_ANGLE_INF, LIMIT_ANGLE_SUP, center_bounding_rect, bounding_rectangle.height * BOUNDING_RECT_FINGER_SIZE_SCALING))
+					finger_points.push_back(filtered_start_points[i]);
 			}
 
-			if (finger_points.size() > 2) {
-				if (findPointsDistanceOnX(finger_points[0], finger_points[finger_points.size() - 1]) > bounding_rectangle.height * BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING * 1.5)
+			if (finger_points.size() > 0) {
+
+				// we have at most five fingers usually :)
+				while (finger_points.size() > 5)
+					finger_points.pop_back();
+
+				// filter out the points too close to each other
+				for (int i = 0; i < finger_points.size() - 1; i++) {
+					if (findPointsDistanceOnX(finger_points[i], finger_points[i + 1]) > bounding_rectangle.height * BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING * 1.5)
+						filtered_finger_points.push_back(finger_points[i]);
+				}
+
+				if (finger_points.size() > 2) {
+					if (findPointsDistanceOnX(finger_points[0], finger_points[finger_points.size() - 1]) > bounding_rectangle.height * BOUNDING_RECT_NEIGHBOR_DISTANCE_SCALING * 1.5)
+						filtered_finger_points.push_back(finger_points[finger_points.size() - 1]);
+				}
+				else
 					filtered_finger_points.push_back(finger_points[finger_points.size() - 1]);
 			}
-			else
-				filtered_finger_points.push_back(finger_points[finger_points.size() - 1]);
 		}
-	}
-	
-	// we draw what found on the returned image 
-	drawContours(contours_image, contours, biggest_contour_index, color_green, 2, 8, hierarchy);
-	polylines(contours_image, hull_points, true, color_blue);
-	rectangle(contours_image, bounding_rectangle.tl(), bounding_rectangle.br(), color_red, 2, 8, 0);
-	circle(contours_image, center_bounding_rect, 5, color_purple, 2, 8);
-	drawVectorPoints(contours_image, filtered_start_points, color_blue, true);
-	drawVectorPoints(contours_image, filtered_far_points, color_red, true);
-	drawVectorPoints(contours_image, filtered_finger_points, color_yellow, false);
-	putText(contours_image, to_string(filtered_finger_points.size()), center_bounding_rect, FONT_HERSHEY_PLAIN, 3, color_purple);
+		
+		// we draw what found on the returned image 
+		drawContours(contours_image, contours, contourIndex, color_green, 2, 8, hierarchy);
+		polylines(contours_image, hull_points, true, color_blue);
+		rectangle(contours_image, bounding_rectangle.tl(), bounding_rectangle.br(), color_red, 2, 8, 0);
+		circle(contours_image, center_bounding_rect, 5, color_purple, 2, 8);
+		drawVectorPoints(contours_image, filtered_start_points, color_blue, true);
+		drawVectorPoints(contours_image, filtered_far_points, color_red, true);
+		drawVectorPoints(contours_image, filtered_finger_points, color_yellow, false);
+		putText(contours_image, to_string(filtered_finger_points.size()), center_bounding_rect, FONT_HERSHEY_PLAIN, 3, color_purple);
 
-	// and on the starting frame
-	drawContours(frame, contours, biggest_contour_index, color_green, 2, 8, hierarchy);
-	circle(frame, center_bounding_rect, 5, color_purple, 2, 8);
-	drawVectorPoints(frame, filtered_finger_points, color_yellow, false);
-	putText(frame, to_string(filtered_finger_points.size()), center_bounding_rect, FONT_HERSHEY_PLAIN, 3, color_purple);
+		// and on the starting frame
+		drawContours(frame, contours, contourIndex, color_green, 2, 8, hierarchy);
+		circle(frame, center_bounding_rect, 5, color_purple, 2, 8);
+		drawVectorPoints(frame, filtered_finger_points, color_yellow, false);
+		putText(frame, to_string(filtered_finger_points.size()), center_bounding_rect, FONT_HERSHEY_PLAIN, 3, color_purple);
+
+		drawVectorPoints(frame, centerEvolution, color_blue, false);
+
+		if (centerEvolution.size() > 10) Processing::processMovement(centerEvolution.end() - 10, centerEvolution.end());
+		if (areaEvolution.size() > 10) Processing::processArea(areaEvolution.end() - 10, areaEvolution.end());
+	}
+
+	if (rotateImage) rotate(frame, frame, ROTATE_180);
 
 	return contours_image;
 }

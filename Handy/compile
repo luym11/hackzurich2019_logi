@@ -1,0 +1,1 @@
+g++ *.cpp `pkg-config --cflags --libs ../../opencv/build/unix-install/opencv.pc`

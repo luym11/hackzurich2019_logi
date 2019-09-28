@@ -1,5 +1,5 @@
 #include "FaceDetector.h"
-#include"opencv2\opencv.hpp"
+#include"opencv2/opencv.hpp"
 
 /*
  Author: Pierfrancesco Soffritti https://github.com/PierfrancescoSoffritti

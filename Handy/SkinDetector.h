@@ -1,6 +1,6 @@
 #pragma once
 
-#include<opencv\cv.h>
+#include<opencv/cv.h>
 
 /*
  Author: Pierfrancesco Soffritti https://github.com/PierfrancescoSoffritti
@@ -30,5 +30,5 @@ class SkinDetector {
 		Rect skinColorSamplerRectangle1, skinColorSamplerRectangle2;
 
 		void calculateThresholds(Mat sample1, Mat sample2);
-		void SkinDetector::performOpening(Mat binaryImage, int structuralElementShapde, Point structuralElementSize);
+		void performOpening(Mat binaryImage, int structuralElementShapde, Point structuralElementSize);
 };
