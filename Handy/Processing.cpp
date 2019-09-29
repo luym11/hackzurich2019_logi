@@ -94,8 +94,9 @@ void Processing::processArea(vector<double>::iterator begin, vector<double>::ite
 			lastMovement.pinType = EXPAND;
 			Processing::lastMovement.isLocked = false;
 		}
+	} else {
+		lastMovement.pinType = NO_PINCH;
 	}
-	lastMovement.pinType = NO_PINCH;
 }
 
 void Processing::processFinger(vector<int>::iterator begin, vector<int>::iterator end) {
