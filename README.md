@@ -1,5 +1,9 @@
-# Handy
-Handy is a hand detection software written in C++ using OpenCV v3.4.1. The software is capable of recognizing hands in an video and of counting the number of lifted fingers.
+# Wavability
+
+Wavability converts gestures to input by using computer vision to track users' hands and map these movements to various input commands.
+
+
+Forked from [Handy](https://github.com/PierfrancescoSoffritti/handy). Handy is a hand detection software written in C++ using OpenCV v3.4.1. The software is capable of recognizing hands in an video and of counting the number of lifted fingers.
 
 ## Software assumptions
 A few assumptions have been made:
